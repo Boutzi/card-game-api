@@ -1,8 +1,10 @@
 const pool = require("../database/db");
 
-async function getProfileDataByEmail(email) {
+async function getProfileDataByEmail(email, provider) {
   try {
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    const result = await pool.query("SELECT * FROM users WHERE email = $1 AND provider = $2", [email, provider]);
+    console.log("result.rows[0]:", result.rows[0]);
+
     return result.rows[0] || null;
   } catch (error) {
     console.error("Error fetching profile data by email:", error);
@@ -26,4 +28,21 @@ async function createProfile(profile) {
   }
 }
 
-module.exports = { getProfileDataByEmail, createProfile };
+async function updateProfile(userId, updatedProfile) {
+  const { displayName, givenName, familyName } = updatedProfile;
+  try {
+    const result = await pool.query(
+      `UPDATE users
+       SET "displayName" = $1, "givenName" = $2, "familyName" = $3
+       WHERE id = $4
+       RETURNING *`,
+      [displayName, givenName, familyName, userId]
+    );
+    return result.rows[0];
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    return null;
+  }
+}
+
+module.exports = { getProfileDataByEmail, createProfile, updateProfile };
