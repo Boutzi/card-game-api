@@ -1,5 +1,7 @@
+
+# ENV
 .env
 .env.local
+
+# FOLDERS
 node_modules/
-package-lock.json
-data/
