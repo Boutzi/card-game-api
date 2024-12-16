@@ -11,13 +11,13 @@ async function getProfileDataByEmail(email) {
 }
 
 async function createProfile(profile) {
-  const { displayName, givenName, familyName, email, stack } = profile;
+  const { displayName, givenName, familyName, email, stack, provider } = profile;
   try {
     const result = await pool.query(
-      `INSERT INTO users ("displayName", "givenName", "familyName", email, stack)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO users ("displayName", "givenName", "familyName", email, stack, provider)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [displayName, givenName, familyName, email, stack]
+      [displayName, givenName, familyName, email, stack, provider]
     );
     return result.rows[0];
   } catch (error) {
