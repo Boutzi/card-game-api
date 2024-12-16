@@ -2,7 +2,7 @@ const express = require("express");
 const passport = require("passport");
 const session = require("express-session");
 const isLogged = require("./middleware/session");
-const { profileSchema, getProfileData, saveProfileData } = require("./services/profileService");
+const { getProfileDataByEmail, createProfile } = require("./services/profileService");
 
 require("./services/authService");
 
@@ -27,24 +27,18 @@ app.get("/", (req, res) => {
 app.get("/profile", isLogged, async (req, res) => {
   const user = req.user;
 
-  const profileData = await getProfileData();
-  let userProfile = profileData.find((profile) => profile.email === user.email);
+  let userProfile = await getProfileDataByEmail(user.email);
 
   if (!userProfile) {
-    userProfile = profileSchema(
-      profileData.length + 1,
-      user.given_name,
-      user.given_name,
-      user.family_name,
-      user.email,
-      10000
-    );
-
-    profileData.push(userProfile);
-    await saveProfileData(profileData);
+    userProfile = await createProfile({
+      displayName: user.given_name || "",
+      givenName: user.given_name,
+      familyName: user.family_name || "",
+      email: user.email,
+      stack: 10000,
+    });
   }
-  const send = JSON.stringify(userProfile);
-  res.send(send);
+  res.json(userProfile);
 });
 
 app.get("/auth/google", passport.authenticate("google", { scope: ["email", "profile"] }));

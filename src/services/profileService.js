@@ -1,59 +1,29 @@
-const fs = require("fs").promises;
-const path = require("path");
+const pool = require("../database/db");
 
-async function getProfileData() {
+async function getProfileDataByEmail(email) {
   try {
-    const filePath = path.join(__dirname, "..", "data", "profile.json");
-
-    await ensureFileExists(filePath);
-
-    const data = await fs.readFile(filePath, "utf-8");
-    return JSON.parse(data);
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    return result.rows[0] || null;
   } catch (error) {
-    console.error("Error fetching profile data:", error);
-    return [];
+    console.error("Error fetching profile data by email:", error);
+    return null;
   }
 }
 
-async function saveProfileData(data) {
+async function createProfile(profile) {
+  const { displayName, givenName, familyName, email, stack } = profile;
   try {
-    const filePath = path.join(__dirname, "..", "data", "profile.json");
-
-    await ensureDirectoryExists(path.dirname(filePath));
-
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
+    const result = await pool.query(
+      `INSERT INTO users ("displayName", "givenName", "familyName", email, stack)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
+      [displayName, givenName, familyName, email, stack]
+    );
+    return result.rows[0];
   } catch (error) {
-    console.error("Error saving profile data:", error);
+    console.error("Error creating profile:", error);
+    return null;
   }
 }
 
-async function ensureFileExists(filePath) {
-  try {
-    await fs.access(filePath);
-  } catch {
-    await ensureDirectoryExists(path.dirname(filePath));
-    await fs.writeFile(filePath, JSON.stringify([], null, 2), "utf-8");
-  }
-}
-
-async function ensureDirectoryExists(directoryPath) {
-  try {
-    await fs.access(directoryPath);
-  } catch {
-    await fs.mkdir(directoryPath, { recursive: true });
-  }
-}
-
-function profileSchema(id, displayName, givenName, familyName, email, stack) {
-  const profileSchema = {
-    id: id,
-    displayName: displayName,
-    givenName: givenName,
-    familyName: familyName,
-    email: email,
-    stack: stack,
-  };
-  return profileSchema;
-}
-
-module.exports = { getProfileData, saveProfileData, profileSchema };
+module.exports = { getProfileDataByEmail, createProfile };
