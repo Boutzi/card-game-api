@@ -42,7 +42,6 @@ app.get("/profile", isLogged, async (req, res) => {
 
     profileData.push(userProfile);
     await saveProfileData(profileData);
-    console.log(userProfile);
   }
   const send = JSON.stringify(userProfile);
   res.send(send);
