@@ -12,7 +12,7 @@ passport.use(
       // Standard OAuth2 options
       clientID: process.env.MICROSOFT_CLIENT_ID,
       clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
-      callbackURL: process.env.MICROSOFT_CALLBACK_URL || "http://localhost:3000/auth/microsoft/callback",
+      callbackURL: process.env.MICROSOFT_CALLBACK_URL,
       scope: ["user.read"],
       // optional
       tenant: "common",

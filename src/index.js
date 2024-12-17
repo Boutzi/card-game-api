@@ -3,11 +3,27 @@ const session = require("express-session");
 const passport = require("passport");
 const isLogged = require("./utils/authMiddleware");
 const restRoutes = require("./rest");
+const cors = require("cors");
 
 require("./auth");
 
 const app = express();
 const port = 3000;
+
+const allowedOrigins = ["http://localhost:3001"];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Origin not allowed by CORS"));
+    }
+  },
+  credentials: true, // Si tu utilises des sessions/cookies
+};
+
+app.use(cors(corsOptions));
 
 app.use(
   session({
