@@ -1,9 +1,8 @@
-const pool = require("../database/db");
+const pool = require("../database/pool");
 
 async function getProfileDataByEmail(email, provider) {
   try {
     const result = await pool.query("SELECT * FROM users WHERE email = $1 AND provider = $2", [email, provider]);
-    console.log("result.rows[0]:", result.rows[0]);
 
     return result.rows[0] || null;
   } catch (error) {
